@@ -1,30 +1,16 @@
-// OMEGA ANNIHILATOR
-// One weapon to end absolutely everything 🌌
+// ======================================================
+// OMEGA FREEZE CORE
+// Alternates between freezing and heating every tick
+// ======================================================
 
-// Creates:
-// - Fire
-// - Plasma
-// - Lightning
-// - Ice
-// - Lava
-// - Explosions
-// - Radiation
-// - Deletion fields
-// - Extreme heat + cold at once
+elements.omega_freeze_core = {
+    name: "Omega Freeze Core",
 
-elements.omega_annihilator = {
     color: [
-        "#000000",
-        "#ff0000",
         "#00ffff",
         "#ffffff",
-        "#ff00ff"
-    ],
-
-    behavior: [
-        "HT:9999 AND CO:9999 AND CR:plasma%20 AND CR:lightning%10|DL%8|HT:9999 AND CR:fire%25",
-        "DL%8 AND EX:35>plasma,fire,lava,electric,radiation,smoke|XX|DL%8 AND EX:35>plasma,fire,lava,electric,radiation,smoke",
-        "CO:9999 AND CR:snow%20 AND CR:ice%20|DL%8|HT:9999 AND CO:9999"
+        "#88ddff",
+        "#2244ff"
     ],
 
     category: "weapons",
@@ -32,31 +18,66 @@ elements.omega_annihilator = {
 
     density: 999999,
     conduct: 1,
-
-    temp: 50000,
+    hardness: 1,
 
     glow: true,
+    excludeRandom: true,
+
+    tick: function(pixel) {
+
+        // toggle state
+        pixel.freezeMode = !pixel.freezeMode;
+
+        for (let dx = -3; dx <= 3; dx++) {
+            for (let dy = -3; dy <= 3; dy++) {
+
+                let x = pixel.x + dx;
+                let y = pixel.y + dy;
+
+                if (outOfBounds(x,y)) continue;
+
+                let target = pixelMap[x][y];
+
+                if (!target) continue;
+
+                // =====================================
+                // FREEZE FRAME
+                // =====================================
+                if (pixel.freezeMode) {
+
+                    target.temp -= 1000;
+
+                    if (Math.random() < 0.08 && isEmpty(x,y,false)) {
+                        createPixel("snow", x, y);
+                    }
+
+                }
+
+                // =====================================
+                // UNFREEZE / HEAT FRAME
+                // =====================================
+                else {
+
+                    target.temp += 1000;
+
+                    if (Math.random() < 0.04 && target.element === "ice") {
+                        changePixel(target,"water");
+                    }
+                }
+            }
+        }
+    },
 
     reactions: {
+
         "water": {
-            elem2: "plasma",
-            chance: 1
+            elem2: "ice",
+            chance: 0.3
         },
-        "lava": {
-            elem2: "obsidian",
-            chance: 0.5
-        },
-        "human": {
-            elem2: "ash",
-            chance: 1
-        },
-        "plant": {
-            elem2: "fire",
-            chance: 1
-        },
-        "ice": {
-            elem2: "steam",
-            chance: 1
+
+        "steam": {
+            elem2: "water",
+            chance: 0.3
         }
     }
 };
