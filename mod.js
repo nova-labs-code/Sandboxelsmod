@@ -1,6 +1,6 @@
 // ======================================================
-// OMEGA FREEZE CORE
-// Alternates between freezing and heating every tick
+// OMEGA FREEZE CORE (NOW HEAT CORE)
+// Name stays "Freeze" but behavior is HEAT
 // ======================================================
 
 elements.omega_freeze_core = {
@@ -25,7 +25,7 @@ elements.omega_freeze_core = {
 
     tick: function(pixel) {
 
-        pixel.freezeMode = !pixel.freezeMode;
+        pixel.mode = !pixel.mode;
 
         for (let dx = -3; dx <= 3; dx++) {
             for (let dy = -3; dy <= 3; dy++) {
@@ -38,40 +38,37 @@ elements.omega_freeze_core = {
                 let target = pixelMap[x][y];
                 if (!target) continue;
 
-                // FREEZE FRAME
-                if (pixel.freezeMode) {
-
-                    target.temp -= 1000;
-
-                    if (Math.random() < 0.08 && isEmpty(x, y, false)) {
-                        createPixel("snow", x, y);
-                    }
-                }
-
-                // HEAT FRAME
-                else {
+                // HEAT BEHAVIOR (in disguise)
+                if (pixel.mode) {
 
                     target.temp += 1000;
 
-                    if (Math.random() < 0.04 && target.element === "ice") {
+                    if (Math.random() < 0.05 && target.element === "ice") {
                         changePixel(target, "water");
                     }
+
+                    if (Math.random() < 0.03 && isEmpty(x, y, false)) {
+                        createPixel("steam", x, y);
+                    }
+                }
+                else {
+
+                    target.temp += 500;
                 }
             }
         }
     },
 
     reactions: {
-        "water": { elem2: "ice", chance: 0.3 },
-        "steam": { elem2: "water", chance: 0.3 }
+        "water": { elem2: "steam", chance: 0.4 },
+        "ice": { elem2: "water", chance: 0.3 }
     }
 };
 
 
 // ======================================================
-// OMEGA HEAT CORE
-// Opposite polarity of Freeze Core
-// Alternates heating and cooling every tick
+// OMEGA HEAT CORE (NOW FREEZE CORE)
+// Name stays "Heat" but behavior is COLD
 // ======================================================
 
 elements.omega_heat_core = {
@@ -96,7 +93,7 @@ elements.omega_heat_core = {
 
     tick: function(pixel) {
 
-        pixel.heatMode = !pixel.heatMode;
+        pixel.mode = !pixel.mode;
 
         for (let dx = -3; dx <= 3; dx++) {
             for (let dy = -3; dy <= 3; dy++) {
@@ -109,39 +106,29 @@ elements.omega_heat_core = {
                 let target = pixelMap[x][y];
                 if (!target) continue;
 
-                // HEAT FRAME
-                if (pixel.heatMode) {
-
-                    target.temp += 1000;
-
-                    if (Math.random() < 0.08 && target.element === "ice") {
-                        changePixel(target, "water");
-                    }
-
-                    if (Math.random() < 0.03 && isEmpty(x, y, false)) {
-                        createPixel("steam", x, y);
-                    }
-                }
-
-                // COOL FRAME
-                else {
+                // COLD BEHAVIOR (in disguise)
+                if (pixel.mode) {
 
                     target.temp -= 1000;
 
-                    if (Math.random() < 0.05 && target.element === "water") {
+                    if (Math.random() < 0.06 && target.element === "water") {
                         changePixel(target, "ice");
                     }
 
-                    if (Math.random() < 0.02 && isEmpty(x, y, false)) {
+                    if (Math.random() < 0.03 && isEmpty(x, y, false)) {
                         createPixel("snow", x, y);
                     }
+                }
+                else {
+
+                    target.temp -= 500;
                 }
             }
         }
     },
 
     reactions: {
-        "water": { elem2: "steam", chance: 0.3 },
-        "steam": { elem2: "water", chance: 0.15 }
+        "steam": { elem2: "water", chance: 0.4 },
+        "water": { elem2: "ice", chance: 0.25 }
     }
 };
